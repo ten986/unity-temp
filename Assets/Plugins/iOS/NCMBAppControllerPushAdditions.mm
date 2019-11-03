@@ -1,5 +1,5 @@
 /*******
- Copyright 2017 FUJITSU CLOUD TECHNOLOGIES LIMITED All Rights Reserved.
+ Copyright 2017-2019 FUJITSU CLOUD TECHNOLOGIES LIMITED All Rights Reserved.
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -189,17 +189,17 @@ extern "C"
     void NCMBPushHandle(NSDictionary *userInfo)
     {
         // NCMB Handle Rich Push
-        if ([userInfo.allKeys containsObject:@"com.nifty.RichUrl"])
+        if ([userInfo.allKeys containsObject:@"com.nifcloud.mbaas.RichUrl"])
         {
             [NCMBRichPushView handleRichPush:userInfo];
         }
         
         // NCMB Handle Analytics
-        if ([userInfo.allKeys containsObject:@"com.nifty.PushId"])
+        if ([userInfo.allKeys containsObject:@"com.nifcloud.mbaas.PushId"])
         {
             if ([[UIApplication sharedApplication] applicationState] != UIApplicationStateActive)
             {
-                NSString * pushId = [userInfo objectForKey:@"com.nifty.PushId"];
+                NSString * pushId = [userInfo objectForKey:@"com.nifcloud.mbaas.PushId"];
                 const char *pushIdConstChar = [pushId UTF8String];
                 notifyUnityWithClassName("NCMBManager","onAnalyticsReceived",pushIdConstChar);
             }
@@ -210,10 +210,10 @@ extern "C"
             NSMutableDictionary *aps = [NSMutableDictionary dictionaryWithDictionary:[userInfo objectForKey:@"aps"]];
             [beforeUserInfo setObject:aps forKey:@"aps"];
             if([[aps objectForKey:@"alert"] objectForKey:@"title"]){
-                [beforeUserInfo setObject:[[aps objectForKey:@"alert"] objectForKey:@"title"] forKey:@"com.nifty.Title"]; //Titleを追加
+                [beforeUserInfo setObject:[[aps objectForKey:@"alert"] objectForKey:@"title"] forKey:@"com.nifcloud.mbaas.Title"]; //Titleを追加
             }
             if([[aps objectForKey:@"alert"] objectForKey:@"body"]){
-                [beforeUserInfo setObject:[[aps objectForKey:@"alert"] objectForKey:@"body"] forKey:@"com.nifty.Message"]; //Messageを追加
+                [beforeUserInfo setObject:[[aps objectForKey:@"alert"] objectForKey:@"body"] forKey:@"com.nifcloud.mbaas.Message"]; //Messageを追加
             }
             userInfo = (NSMutableDictionary *)beforeUserInfo;
         }
@@ -282,13 +282,18 @@ NSInteger pushDelayCount = 0;
 - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
 {
     //deviceTokenをNSData *からconst char *へ変換します
-    NSMutableString *tokenId = [[NSMutableString alloc] initWithString:[NSString stringWithFormat:@"%@",deviceToken]];
-    [tokenId setString:[tokenId stringByReplacingOccurrencesOfString:@" " withString:@""]]; //余計な文字を消す
-    [tokenId setString:[tokenId stringByReplacingOccurrencesOfString:@"<" withString:@""]];
-    [tokenId setString:[tokenId stringByReplacingOccurrencesOfString:@">" withString:@""]];
-    const char * deviceTokenConstChar = [tokenId UTF8String];
-    //Unityへデバイストークンを送り、UnityからmBaaS backendのinstallationクラスへ保存します
-    notifyUnityWithClassName("NCMBManager", "onTokenReceived", deviceTokenConstChar);
+    if ([deviceToken isKindOfClass:[NSData class]] && [deviceToken length] != 0){
+        unsigned char *dataBuffer = (unsigned char*)deviceToken.bytes;
+        NSMutableString *tokenId = [NSMutableString stringWithCapacity:(deviceToken.length * 2)];
+        for (int i = 0; i < deviceToken.length; ++i) {
+            [tokenId appendFormat:@"%02x", dataBuffer[i]];
+        }
+        const char * deviceTokenConstChar = [tokenId UTF8String];
+        //Unityへデバイストークンを送り、UnityからmBaaS backendのinstallationクラスへ保存します
+        notifyUnityWithClassName("NCMBManager", "onTokenReceived", deviceTokenConstChar);
+    } else {
+        NSLog(@"[NCMB]: 不正なデバイストークのため、端末登録を行いません");
+    }
 }
 
 - (void)application:(UIApplication*)application didFailToRegisterForRemoteNotificationsWithError:(NSError*)error

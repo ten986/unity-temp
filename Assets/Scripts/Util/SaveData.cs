@@ -40,8 +40,8 @@ public class SaveData : ISerializationCallbackReceiver {
   public bool PlayerConsent = false;
 
   [SerializeField]
-  private string _hiscore = "";
-  public Dictionary<Level, int> HiScore = new Dictionary<Level, int>();
+  // private string _hiscore = "";
+  // public Dictionary<Level, int> HiScore = new Dictionary<Level, int>();
   //=================================================================================
   //シリアライズ,デシリアライズ時のコールバック
   //=================================================================================

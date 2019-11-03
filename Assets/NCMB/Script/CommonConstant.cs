@@ -1,5 +1,5 @@
 ﻿/*******
- Copyright 2017 FUJITSU CLOUD TECHNOLOGIES LIMITED All Rights Reserved.
+ Copyright 2017-2019 FUJITSU CLOUD TECHNOLOGIES LIMITED All Rights Reserved.
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -37,11 +37,11 @@ namespace NCMB.Internal
 	internal static class CommonConstant
 	{
 		//service
-		public static readonly string DOMAIN = "mb.api.cloud.nifty.com";//ドメイン
-		public static readonly string DOMAIN_URL = "https://mb.api.cloud.nifty.com";//ドメインのURL
+		public static readonly string DOMAIN = "mbaas.api.nifcloud.com";//ドメイン
+		public static readonly string DOMAIN_URL = "https://mbaas.api.nifcloud.com";//ドメインのURL
 
 		public static readonly string API_VERSION = "2013-09-01";//APIバージョン
-		public static readonly string SDK_VERSION = "3.2.1"; //SDKバージョン
+		public static readonly string SDK_VERSION = "4.0.3"; //SDKバージョン
 		//DEBUG LOG Setting: NCMBDebugにてdefine設定をしてください
 	}
 }

@@ -4,13 +4,29 @@ using UnityEngine;
 
 namespace naichilab
 {
-	public interface IScore
-	{
+    /// <summary>
+    /// スコア情報インターフェース
+    /// </summary>
+    public interface IScore
+    {
+        /// <summary>
+        /// スコアタイプ
+        /// </summary>
+        ScoreType Type { get; }
 
-		string TextForDisplay{ get; }
+        /// <summary>
+        /// 表示用文字列
+        /// </summary>
+        string TextForDisplay { get; }
 
-		string TextForSave{ get; }
+        /// <summary>
+        /// 保存用文字列
+        /// </summary>
+        string TextForSave { get; }
 
-		double Value{ get; }
-	}
+        /// <summary>
+        /// 値
+        /// </summary>
+        double Value { get; }
+    }
 }

@@ -1,83 +1,96 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using System;
+using System.Linq;
+using UnityEngine.Serialization;
 
 namespace naichilab
 {
-	public class RankingLoader:MonoBehaviour
-	{
-		[SerializeField]
-		public ScoreTypeSetting setting;
+    /// <summary>
+    /// ランキング読み込みクラス
+    /// </summary>
+    public class RankingLoader : MonoBehaviour
+    {
+        /// <summary>
+        /// リーダーボード一覧
+        /// </summary>
+        [SerializeField] public RankingBoards RankingBoards;
 
-		[HideInInspector]
-		[NonSerialized]
-		public IScore Score;
+        /// <summary>
+        /// 表示対象のボード
+        /// </summary>
+        [NonSerialized] public RankingInfo CurrentRanking;
 
-		#region singleton
+        /// <summary>
+        /// 直前のスコア
+        /// </summary>
+        [NonSerialized] public IScore LastScore;
 
-		private static RankingLoader instance;
+        #region singleton
 
-		public static RankingLoader Instance {
-			get {
-				if (instance == null) {
-					instance = (RankingLoader)FindObjectOfType (typeof(RankingLoader));
+        private static RankingLoader instance;
 
-					if (instance == null) {
-						Debug.LogError (typeof(RankingLoader) + "is nothing");
-					}
-				}
-				return instance;
-			}
-		}
+        public static RankingLoader Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = (RankingLoader) FindObjectOfType(typeof(RankingLoader));
 
-		#endregion
+                    if (instance == null)
+                    {
+                        Debug.LogError(typeof(RankingLoader) + "is nothing");
+                    }
+                }
 
-		public void SendScoreAndShowRanking (TimeSpan time)
-		{
-			if (this.setting.Type != ScoreType.Time) {
-				throw new ArgumentException ("スコアの型が違います。");
-			}
+                return instance;
+            }
+        }
 
-			this.Score = new TimeScore (time, this.setting.CustomFormat);
-			this.LoadRankingScene ();
-		}
+        #endregion
 
-		public void SendScoreAndShowRanking (double score)
-		{
-			if (this.setting.Type != ScoreType.Number) {
-				throw new ArgumentException ("スコアの型が違います。");
-			}
+        void Start()
+        {
+            //Class名重複をチェック
+            RankingBoards.CheckDuplicateClassName();
+        }
 
-			this.Score = new NumberScore (score, this.setting.CustomFormat);
-			this.LoadRankingScene ();
-		}
 
-		private void LoadRankingScene ()
-		{			
-			SceneManager.LoadScene ("Ranking", LoadSceneMode.Additive);
-		}
+        /// <summary>
+        /// 時間型スコアの送信とランキング表示を行います
+        /// </summary>
+        /// <param name="time"></param>
+        /// <param name="boardId"></param>
+        public void SendScoreAndShowRanking(TimeSpan time, int boardId = 0)
+        {
+            var board = RankingBoards.GetRankingInfo(boardId);
+            var sc = new TimeScore(time, board.CustomFormat);
+            SendScoreAndShowRanking(sc, board);
+        }
 
-		public IScore BuildScore (string scoreText)
-		{
-			try {
-				switch (this.setting.Type) {
-				case ScoreType.Number:
-					double d = double.Parse (scoreText);
-					return new NumberScore (d, this.setting.CustomFormat);
-					break;
-				case ScoreType.Time:
-					long ticks = long.Parse (scoreText);
-					TimeSpan t = new TimeSpan (ticks);
-					return new TimeScore (t, this.setting.CustomFormat);
-					break;
-				}
-			} catch (Exception ex) {
-				Debug.LogWarning ("不正なデータが渡されました。[" + scoreText + "]");
-			}
+        /// <summary>
+        /// 数値型スコアの送信とランキング表示を行います
+        /// </summary>
+        /// <param name="score"></param>
+        /// <param name="boardId"></param>
+        public void SendScoreAndShowRanking(double score, int boardId = 0)
+        {
+            var board = RankingBoards.GetRankingInfo(boardId);
+            var sc = new NumberScore(score, board.CustomFormat);
+            SendScoreAndShowRanking(sc, board);
+        }
 
-			return null;
-		}
-	}
+        private void SendScoreAndShowRanking(IScore score, RankingInfo board)
+        {
+            if (board.Type != score.Type)
+            {
+                throw new ArgumentException("スコアの型が違います。");
+            }
+
+            CurrentRanking = board;
+            LastScore = score;
+            SceneManager.LoadScene("Ranking", LoadSceneMode.Additive);
+        }
+    }
 }

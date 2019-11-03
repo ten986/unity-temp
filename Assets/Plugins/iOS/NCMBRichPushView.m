@@ -1,5 +1,5 @@
 /*
- Copyright 2017 FUJITSU CLOUD TECHNOLOGIES LIMITED All Rights Reserved.
+ Copyright 2017-2019 FUJITSU CLOUD TECHNOLOGIES LIMITED All Rights Reserved.
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -295,7 +295,7 @@ shouldStartLoadWithRequest:(NSURLRequest*) request
 static NCMBRichPushView *rv;
 
 + (void) handleRichPush:(NSDictionary *)userInfo {
-    NSString *urlStr = [userInfo objectForKey:@"com.nifty.RichUrl"];
+    NSString *urlStr = [userInfo objectForKey:@"com.nifcloud.mbaas.RichUrl"];
     
     if ([urlStr isKindOfClass:[NSString class]]) {
         if (rv == nil){
